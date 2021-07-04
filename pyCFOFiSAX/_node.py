@@ -327,7 +327,7 @@ class TerminalNode(RootNode):
 
         """ Specific part of terminal nodes
         (What? We say terminal nodes?) """
-        # variable pour les bkpt (non incrémental)
+        # Variable for BKPT (non-incremental)
         self.bkpt_min, self.bkpt_max = np_array([]), np_array([])
 
         self.terminal = True

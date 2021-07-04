@@ -71,7 +71,7 @@ def vrang_seq_ref(distance, max_array, min_array, cdf_mean, cdf_std, num_ts_by_n
         np_greater(distance, max_array)
     ].sum()
 
-    # tous les nœuds borderlines
+    # All Borderline nodes
     boolean_grp = np_logical_and(np_less_equal(distance, max_array),
                                  np_greater(distance, min_array))
 
