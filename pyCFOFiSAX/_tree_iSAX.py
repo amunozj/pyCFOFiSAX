@@ -215,10 +215,10 @@ class TreeISAX:
         # mean, variance of data_ts sequences
         self.mu, self.sig = norm.fit(data_ts)
 
-        self.min_max = np_empty(shape=(self.size_word, 2))
-        for i, dim in enumerate(np_array(data_ts).T.tolist()):
-            self.min_max[i][0] = min(dim)-self.mu
-            self.min_max[i][1] = max(dim)+self.mu
+        # self.min_max = np_empty(shape=(self.size_word, 2))
+        # for i, dim in enumerate(np_array(data_ts).T.tolist()):
+        #     self.min_max[i][0] = min(dim)-self.mu
+        #     self.min_max[i][1] = max(dim)+self.mu
 
         self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig)
         # verif if all values are properly indexable
