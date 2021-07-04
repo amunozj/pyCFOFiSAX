@@ -104,7 +104,7 @@ class ForestISAX:
                 self.indices_partition.append(list(range(i, self.size_word, self.number_tree)))
 
         else:
-            # liste du nombre de lettre dans chaque arbre
+            # List of letter number in each tree
             self.length_partition = []
             for part_tmp in self.indices_partition:
                 self.length_partition.append(len(part_tmp))
