@@ -23,6 +23,7 @@ from numpy import square as np_square
 from numpy import divide as np_divide
 from numpy import mean as np_mean
 from numpy import max as np_max
+from numpy import min as np_min
 from numpy import minimum as np_minimum
 from numpy import maximum as np_maximum
 from numpy import place as np_place
@@ -34,6 +35,7 @@ from numpy import logical_not as np_logical_not
 from numpy import linspace as np_linspace
 from numpy import searchsorted as np_searchsorted
 from numpy import multiply as np_multiply
+from numpy import round
 
 from scipy.stats import norm as scipy_norm
 
@@ -71,7 +73,7 @@ def vrang_seq_ref(distance, max_array, min_array, cdf_mean, cdf_std, num_ts_by_n
         np_greater(distance, max_array)
     ].sum()
 
-    # All Borderline nodes
+    # tous les nœuds borderlines
     boolean_grp = np_logical_and(np_less_equal(distance, max_array),
                                  np_greater(distance, min_array))
 
@@ -215,10 +217,15 @@ class TreeISAX:
         # mean, variance of data_ts sequences
         self.mu, self.sig = norm.fit(data_ts)
 
-        # self.min_max = np_empty(shape=(self.size_word, 2))
-        # for i, dim in enumerate(np_array(data_ts).T.tolist()):
-        #     self.min_max[i][0] = min(dim)-self.mu
-        #     self.min_max[i][1] = max(dim)+self.mu
+        self.min_max = np_empty(shape=(self.size_word, 2))
+        slice_size = int(round(data_ts.shape[1]/self.size_word))
+        for i in range(0,self.size_word):            
+            if i < self.size_word-1:
+                data_slice = data_ts[:, i*slice_size:(i+1)*slice_size]
+            else:
+                data_slice = data_ts[:, i*slice_size:data_ts.shape[1]]
+            self.min_max[i][0] = np_min(data_slice)-self.mu
+            self.min_max[i][1] = np_max(data_slice)+self.mu
 
         self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig)
         # verif if all values are properly indexable
