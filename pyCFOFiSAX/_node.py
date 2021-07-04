@@ -36,7 +36,14 @@ class RootNode(Node):
         :rtype: RootNode
         """
 
-        self.iSAX_word = np_array([sax, cardinality]).T
+        self.iSAX_word = ''
+        for i in range(0,len(sax)):
+            if i!=0:
+                self.iSAX_word += '_'
+
+            self.iSAX_word = self.iSAX_word + str(sax[i]) + '.' + str(cardinality[i])
+
+        # self.iSAX_word = np_array([sax, cardinality]).T
 
         Node.__init__(self, parent=parent, name=str(self.iSAX_word))
 
