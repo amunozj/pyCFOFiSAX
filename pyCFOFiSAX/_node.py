@@ -11,6 +11,7 @@ from numpy import zeros as np_zeros
 from numpy import array as np_array
 from numpy import empty as np_empty
 from numpy import argmin as np_argmin
+import pandas as pd
 
 """ Module for grouping the three types of nodes used by the Isax tree """
 
@@ -106,7 +107,7 @@ class RootNode(Node):
                     # For each of the sequences of the current leaf are inserted its sequences in the new internal node
                     # This internal node will create one or more leaves to insert these sequences
                     for j,ts in enumerate(current_node.sequences):
-                        new_node.insert_paa(ts, current_node.annotations[j])
+                        new_node.insert_paa(ts, current_node.annotations.loc[[j],:])
                     # and we delete the current leaf from the list of nodes
                     self.nodes.remove(current_node)
                     # that we also remove from Dict
@@ -183,10 +184,17 @@ class RootNode(Node):
         :returns: Annotations
         :rtype: numpy.ndarray
         """
-        annotations = []
+        annotations = pd.DataFrame()
         for node in self.nodes:
-            for ant in node.get_annotations():
-                annotations.append(ant)
+            annotations = pd.concat((annotations,node.get_annotations() )).reset_index(drop=True)
+
+        sequences = []
+        for node in self.nodes:
+            for ts in node.get_sequences():
+                sequences.append(ts)
+
+        annotations = annotations.insert(0, 'iSAX', sequences)
+
         return annotations
 
     def get_sequences(self):
@@ -363,7 +371,7 @@ class TerminalNode(RootNode):
 
         """ Important, the list of PAA sequences that the tree contains"""
         self.sequences = []
-        self.annotations = []
+        self.annotations = pd.DataFrame()
 
     def insert_paa(self, ts_paa, annotation=None):
         """
@@ -375,7 +383,7 @@ class TerminalNode(RootNode):
 
         self.sequences.append(ts_paa)
         if annotation is not None:
-            self.annotations.append(annotation)
+            self.annotations  = pd.concat((self.annotations, annotation)).reset_index(drop=True)
         """ indicator maj """
         self.nb_sequences += 1
         # calculate mean and std

@@ -147,7 +147,7 @@ class ForestISAX:
             for j,npa_tp in enumerate(npaa_tmp):
                 entry = None
                 if annotation is not None:
-                    entry = annotation.loc[j,:]
+                    entry = annotation.loc[[j],:]
                 tree.insert_paa(npa_tp, annotation=entry)
                 cmpt_insert[i] += 1
 
