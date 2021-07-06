@@ -76,11 +76,12 @@ class RootNode(Node):
         self.id = RootNode.id_global
         RootNode.id_global += 1
 
-    def insert_paa(self, new_paa):
+    def insert_paa(self, new_paa, annotation=None):
         """
         The insert_paa(new_paa) function to insert a new converted sequence into PAA
 
         :param new_paa: The converted sequence in PAA to insert
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf        
         """
 
         i_sax_word = self.tree.isax.transform_paa_to_isax(new_paa, self.cardinality_next)[0]
@@ -94,18 +95,18 @@ class RootNode(Node):
                 # and that we do not exceed the max threshold or the leaf node is no longer splitable
                 # nb : This second condition is not suggested by Shieh and Kheogh
                 if current_node.nb_sequences < self.tree.threshold or not current_node.splitable:
-                    current_node.insert_paa(new_paa)
+                    current_node.insert_paa(new_paa, annotation=annotation)
                 # But otherwise (we exceed the max threshold and the leaf is splitable)
                 else:
                     # Creation of the new internal node
                     new_node = InternalNode(self.tree, current_node.parent, np_copy(current_node.sax),
                                             np_copy(current_node.cardinality), current_node.sequences)
                     # We insert the new sequence in this new internal node
-                    new_node.insert_paa(new_paa)
+                    new_node.insert_paa(new_paa, annotation=annotation)
                     # For each of the sequences of the current leaf are inserted its sequences in the new internal node
                     # This internal node will create one or more leaves to insert these sequences
-                    for ts in current_node.sequences:
-                        new_node.insert_paa(ts)
+                    for j,ts in enumerate(current_node.sequences):
+                        new_node.insert_paa(ts, current_node.annotations[j])
                     # and we delete the current leaf from the list of nodes
                     self.nodes.remove(current_node)
                     # that we also remove from Dict
@@ -119,12 +120,12 @@ class RootNode(Node):
 
             # Otherwise (it's not a leaf) we continue the search of the tree
             else:
-                current_node.insert_paa(new_paa)
+                current_node.insert_paa(new_paa, annotation=annotation)
 
         # Otherwise (the Sax node does not exist) we create a new leaf
         else:
             new_node = TerminalNode(self.tree, self, [i[0] for i in i_sax_word], np_array(self.cardinality_next))
-            new_node.insert_paa(new_paa)
+            new_node.insert_paa(new_paa, annotation=annotation)
             self.key_nodes[str([i[0] for i in i_sax_word])] = new_node
             self.nodes.append(new_node)
             self.tree.num_nodes += 1
@@ -349,15 +350,19 @@ class TerminalNode(RootNode):
 
         """ Important, the list of PAA sequences that the tree contains"""
         self.sequences = []
+        self.annotations = []
 
-    def insert_paa(self, ts_paa):
+    def insert_paa(self, ts_paa, annotation=None):
         """
         Function that inserts a new sequence in PAA format
 
         :param ts_paa: The new Paa sequence
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf        
         """
 
         self.sequences.append(ts_paa)
+        if annotation is not None:
+            self.annotations.append(annotation)
         """ indicator maj """
         self.nb_sequences += 1
         # calculate mean and std

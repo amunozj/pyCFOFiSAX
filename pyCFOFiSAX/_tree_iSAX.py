@@ -258,28 +258,30 @@ class TreeISAX:
         self._new_insertion_after_preproc = False
         self._new_insertion_after_minmax_nodes = False
 
-    def insert(self, new_sequence):
+    def insert(self, new_sequence, annotation=None):
         """
         The converted insert function in PAA then call the function insert_paa
 
         :param numpy.array new_sequence: The new sequence to be inserted
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
         """
         
         # convert to paa
         paa = self.isax.transform_paa([new_sequence])[0]
         self.insert_paa(paa)
 
-    def insert_paa(self, new_paa):
+    def insert_paa(self, new_paa, annotation=None):
         """
         The insert function that directly calls that of its root node
 
         :param numpy.array new_paa: The new sequence to be inserted
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf        
         """
 
         if len(new_paa) < self.size_word:
             print("Error !! "+new_paa+" is smaller than size.word = "+self.size_word+". FIN")
         else:
-            self.root.insert_paa(new_paa)
+            self.root.insert_paa(new_paa, annotation=annotation)
             self._new_insertion_after_preproc = True
             self._new_insertion_after_minmax_nodes = True
 
