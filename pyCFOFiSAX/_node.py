@@ -176,6 +176,19 @@ class RootNode(Node):
 
         return bkpt_list_min, bkpt_list_max
 
+    def get_annotations(self):
+        """
+        Returns the annotations contained in the node (leaf only) or its descendants
+
+        :returns: Annotations
+        :rtype: numpy.ndarray
+        """
+        annotations = []
+        for node in self.nodes:
+            for ant in node.get_annotations():
+                annotations.append(ant)
+        return annotations
+
     def get_sequences(self):
         """
         Returns the sequences contained in the node (leaf only) or its descendants
@@ -377,6 +390,15 @@ class TerminalNode(RootNode):
             self.mean = self.sum / self.nb_sequences
             self.sn += (ts_paa - mean_moins_1) * (ts_paa - self.mean)
             self.std = np_sqrt(self.sn / self.nb_sequences)
+
+    def get_annotations(self):
+        """
+        Returns the annotations contained in the node
+
+        :returns: The annotations contained in the node
+        :rtype: list
+        """
+        return self.annotations
 
     def get_sequences(self):
         """
