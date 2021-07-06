@@ -174,7 +174,7 @@ def nodes_visited_for_all_seq_ref(len_seq_list, distance,
 
 class TreeISAX:
     """
-    La classe TreeISAX contenant
+    The TreeISAX class contains
      * ISAX distribution of sequences to index
      * and towards the first root node
 
