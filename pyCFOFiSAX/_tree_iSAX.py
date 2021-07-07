@@ -529,6 +529,24 @@ class TreeISAX:
                 node_list.append(node)
         return node_list
 
+    def get_nodes_of_level_or_terminal(self, level: int):
+        """
+        Function to return the nodes of a level knowing root level 0 or terminal nodes above that level
+
+        :param int level: The level of the tree to evaluate
+
+        :returns: The nodes of the level-ie level of the tree
+        :rtype: list
+        """
+        
+        node_list = []
+        for _, _, node in RenderTree(self.root):
+            if node.level == level:
+                node_list.append(node)
+            elif node.level < level and node.terminal:
+                node_list.append(node)
+        return node_list        
+
     def get_number_internal_and_terminal(self):
         """
         Function to return the number of leaf nodes and internal nodes
