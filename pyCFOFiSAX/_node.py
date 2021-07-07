@@ -37,12 +37,12 @@ class RootNode(Node):
         :rtype: RootNode
         """
 
-        # self.iSAX_word = ''
-        # for i in range(0,len(sax)):
-        #     if i!=0:
-        #         self.iSAX_word += '_'
+        self.iSAX_word_small = ''
+        for i in range(0,len(sax)):
+            if i!=0:
+                self.iSAX_word_small += '_'
 
-        #     self.iSAX_word = self.iSAX_word + str(sax[i]) + '.' + str(cardinality[i])
+            self.iSAX_word_small = self.iSAX_word_small + str(sax[i]) + '.' + str(cardinality[i])
 
         self.iSAX_word = np_array([sax, cardinality]).T
 
@@ -50,7 +50,8 @@ class RootNode(Node):
 
         self.tree = tree
         self.sax = sax
-        self.cardinality = cardinality  
+        self.cardinality = cardinality
+        self.short_name = self.iSAX_word_small
 
         self.cardinality_next = np_copy(self.cardinality)
         self.cardinality_next = np_array([x*2 for x in self.cardinality_next])
@@ -187,13 +188,6 @@ class RootNode(Node):
         annotations = pd.DataFrame()
         for node in self.nodes:
             annotations = pd.concat((annotations,node.get_annotations() )).reset_index(drop=True)
-
-        sequences = []
-        for node in self.nodes:
-            for ts in node.get_sequences():
-                sequences.append(ts)
-
-        annotations = annotations.insert(0, 'iSAX', sequences)
 
         return annotations
 
@@ -406,7 +400,9 @@ class TerminalNode(RootNode):
         :returns: The annotations contained in the node
         :rtype: list
         """
-        return self.annotations
+        annotations = self.annotations
+        annotations['Node Name'] = self.short_name
+        return annotations
 
     def get_sequences(self):
         """
