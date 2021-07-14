@@ -149,9 +149,9 @@ class RootNode(Node):
 
     def _do_bkpt(self):
         """
-        The _do_bkpt function calculates the min and max terminals of the node on each dimension of the node.
+        The _do_bkpt function calculates the min and max bounds of the node on each dimension of the node.
 
-        :returns: an array containing the min terminals and one containing the max terminals
+        :returns: an array containing the min bounds and one containing the max bounds
         :rtype: numpy.array, numpy.array
         """
 
@@ -163,11 +163,11 @@ class RootNode(Node):
             if iSAX_letter[1] < 2:
                 bkpt_list_min[i] = self.tree.min_max[i][0]
                 bkpt_list_max[i] = self.tree.min_max[i][1]
-            # the case where there is no BKPT inf
+            # the case where there is no lower bound BKPT 
             elif iSAX_letter[0] == 0:
                 bkpt_list_min[i] = self.tree.min_max[i][0]
                 bkpt_list_max[i] = bkpt_tmp[iSAX_letter[0]]
-            # the case where there is no BKPT sup
+            # the case where there is no upper bound BKPT
             elif iSAX_letter[0] == iSAX_letter[1]-1:
                 bkpt_list_min[i] = bkpt_tmp[iSAX_letter[0]-1]
                 bkpt_list_max[i] = self.tree.min_max[i][1]

@@ -4,7 +4,7 @@
 from pyCFOFiSAX._node import RootNode
 from pyCFOFiSAX._isax import IndexableSymbolicAggregateApproximation
 
-from anytree import RenderTree
+from anytree import RenderTree, LevelOrderIter
 
 from scipy.stats import norm
 from scipy.spatial.distance import cdist
@@ -323,10 +323,10 @@ class TreeISAX:
 
     def _minmax_nodes(self):
         """
-        Returns the terminals of the nodes of the shaft.
+        Returns the bounds of the nodes of the tree.
         Uses :func:`~pyCFOFiSAX.node.RootNode._do_bkpt`.
 
-        :returns: The min and max terminals of the nodes of the tree
+        :returns: The min and max bounds of the nodes of the tree
         :rtype: numpy.ndarray
         """
 
@@ -540,7 +540,7 @@ class TreeISAX:
         """
         
         node_list = []
-        for _, _, node in RenderTree(self.root):
+        for node in LevelOrderIter(self.root, maxlevel=level):
             if node.level == level:
                 node_list.append(node)
             elif node.level < level and node.terminal:
