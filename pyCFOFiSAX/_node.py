@@ -184,8 +184,9 @@ class RootNode(Node):
         node1_bkpt = self._do_bkpt()
         node2_bkpt = node2._do_bkpt()
 
-        distance = np.array([np.abs(node1_bkpt[0] - node1_bkpt[0]), np.abs(node1_bkpt[1] - node2_bkpt[1]), np.abs(node1_bkpt[0] - node2_bkpt[1])])
-        
+        distance = np.array([np.abs(node1_bkpt[0] - node2_bkpt[0]), np.abs(node1_bkpt[1] - node2_bkpt[1])
+                             , np.abs(node1_bkpt[0] - node2_bkpt[1]) , np.abs(node1_bkpt[1] - node2_bkpt[0])])
+
         if metric == 'L1':
             min_dist = np.sum(np.min(distance, axis=0))
             max_dist = np.sum(np.max(distance, axis=0))
@@ -193,7 +194,13 @@ class RootNode(Node):
             min_dist = np.sqrt(np.sum(np.min(distance, axis=0)**2))
             max_dist = np.sqrt(np.sum(np.max(distance, axis=0)**2))
 
-        return min_dist, max_dist
+        mu = self.tree.isax.mean
+        distance_normal = np.array([np.abs(node1_bkpt[0] - node2_bkpt[0]), np.abs(node1_bkpt[1] - node2_bkpt[1])])
+        
+        norm_dist = distance_normal[1,:]
+        norm_dist[node1_bkpt[1]>mu] = distance_normal[0, node1_bkpt[1]>mu]
+
+        return min_dist, max_dist, norm_dist
 
     def get_annotations(self):
         """
