@@ -12,6 +12,7 @@ from numpy import array as np_array
 from numpy import empty as np_empty
 from numpy import argmin as np_argmin
 import pandas as pd
+import numpy as np
 
 """ Module for grouping the three types of nodes used by the Isax tree """
 
@@ -177,6 +178,22 @@ class RootNode(Node):
                 bkpt_list_max[i] = bkpt_tmp[iSAX_letter[0]]
 
         return bkpt_list_min, bkpt_list_max
+
+    def get_min_max_distance(self, node2, metric = 'L2'):
+
+        node1_bkpt = self._do_bkpt()
+        node2_bkpt = node2._do_bkpt()
+
+        distance = np.array([np.abs(node1_bkpt[0] - node1_bkpt[0]), np.abs(node1_bkpt[1] - node2_bkpt[1]), np.abs(node1_bkpt[0] - node2_bkpt[1])])
+        
+        if metric == 'L1':
+            min_dist = np.sum(np.min(distance, axis=0))
+            max_dist = np.sum(np.max(distance, axis=0))
+        else:
+            min_dist = np.sqrt(np.sum(np.min(distance, axis=0)**2))
+            max_dist = np.sqrt(np.sum(np.max(distance, axis=0)**2))
+
+        return min_dist, max_dist
 
     def get_annotations(self):
         """

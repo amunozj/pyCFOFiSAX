@@ -461,7 +461,7 @@ class TreeISAX:
 
     def _minmax_obj_vs_nodeleaf(self):
         """
-        Calculates the min and max distances between the ``ntss_tmp`` sequences and the sheet nodes of the tree.
+        Calculates the min and max distances between the ``ntss_tmp`` sequences and the leaf nodes of the tree.
 
         .. WARNING::
             Attention must be executed after :func:`~pyCFOFiSAX._tree_iSAX.TreeISAX._minmax_obj_vs_node` and :func:`~pyCFOFiSAX._tree_iSAX.TreeISAX.distrib_nn_for_cdf`.

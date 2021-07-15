@@ -35,6 +35,7 @@ print(sys.path)
 # spec.loader.exec_module(TreeISAX)
 
 from pyCFOFiSAX._forest_iSAX import ForestISAX
+from pyCFOFiSAX._isax import IndexableSymbolicAggregateApproximation
 # from pyCFOFiSAX._tree_iSAX import TreeISAX
 from anytree import RenderTree
 
@@ -82,7 +83,19 @@ sw_forest = ForestISAX(size_word=10,
 
 sw_forest.index_data(ts, annotation=ts_loc)
 
+size_word = 10
+mu = np.mean(ts)
+sig = np.std(ts)
+
+isax = IndexableSymbolicAggregateApproximation(size_word, mean=mu, std=sig)
+
+nodes_at_level = sw_forest.forest[0].get_nodes_of_level_or_terminal(8)
+
+annotations_l = nodes_at_level[30].get_annotations()
+sequences_l = nodes_at_level[30].get_sequences()
+annotations_l = pd.concat([pd.Series(sequences_l, index=annotations_l.index, name='iSAX'), annotations_l], axis=1)
+
 # print(sw_forest.forest[0].root.get_sequences())
-print(sw_forest.forest[0].root.get_annotations())
+# print(sw_forest.forest[0].root.get_annotations())
 
 print('done') 
