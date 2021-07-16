@@ -181,6 +181,13 @@ class RootNode(Node):
 
     def get_min_max_distance(self, node2, metric = 'L2'):
 
+        """
+        Function that calculates min, max, and norm distances between two nodes.
+
+        :returns: an array containing the three distances
+        :rtype: numpy.array
+        """        
+
         node1_bkpt = self._do_bkpt()
         node2_bkpt = node2._do_bkpt()
 
@@ -188,10 +195,14 @@ class RootNode(Node):
                              , np.abs(node1_bkpt[0] - node2_bkpt[1]) , np.abs(node1_bkpt[1] - node2_bkpt[0])])
 
         mu = self.tree.isax.mean
-        distance_normal = np.array([np.abs(node1_bkpt[0] - node2_bkpt[0]), np.abs(node1_bkpt[1] - node2_bkpt[1])])
-        
-        norm_dist = distance_normal[1,:]
-        norm_dist[node1_bkpt[1]>mu] = distance_normal[0, node1_bkpt[1]>mu]
+
+        node1_norm_bkpt = node1_bkpt[1].copy()
+        node1_norm_bkpt[node1_bkpt[1]>mu] = node1_bkpt[0][node1_bkpt[1]>mu]
+
+        node2_norm_bkpt = node2_bkpt[1].copy()
+        node2_norm_bkpt[node2_bkpt[1]>mu] = node2_bkpt[0][node2_bkpt[1]>mu]
+
+        norm_dist = np.abs(node1_norm_bkpt-node2_norm_bkpt)
 
         if metric == 'L1':
             min_dist = np.sum(np.min(distance, axis=0))
