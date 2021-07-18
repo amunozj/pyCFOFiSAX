@@ -25,6 +25,8 @@ class ForestISAX:
     each of the trees
     :param boolean boolean_card_max: if ``== True``, Defines a maximum cardinality for encoding *i*\ SAX
     Sequences in each of the trees
+    :param float mu: mean value used to define the isax transformation
+    :param float sig: standard deviation used to define the isax transformation
 
     :ivar list length_partition: The length of the SAX words in each tree (``== [size_word]`` if ``number_tree
     == 1``)
@@ -33,7 +35,8 @@ class ForestISAX:
     def __init__(self, size_word: int, threshold: int, data_ts: np_ndarray, base_cardinality: int = 2,
                  number_tree: int = 1,
                  indices_partition: list = None,
-                 max_card_alphabet: int = 128, boolean_card_max: bool = True):
+                 max_card_alphabet: int = 128, boolean_card_max: bool = True,
+                 mu=None, sig=None):
         """
         Initialization function of the TreeISAX class
 
@@ -57,9 +60,9 @@ class ForestISAX:
 
         self.indices_partition = indices_partition
 
-        self._init_trees(data_ts, max_card_alphabet, boolean_card_max)
+        self._init_trees(data_ts, max_card_alphabet, boolean_card_max, mu=mu, sig=sig)
 
-    def _init_trees(self, data_ts: np_ndarray, max_card_alphabet: int, boolean_card_max: bool):
+    def _init_trees(self, data_ts: np_ndarray, max_card_alphabet: int, boolean_card_max: bool, mu=None, sig=None):
         """
         Function that initializes the tree (s) when creating a ForestISAX object
 
@@ -78,7 +81,9 @@ class ForestISAX:
                 threshold=self.threshold, data_ts=data_ts,
                 base_cardinality=self.base_cardinality,
                 max_card_alphabet=max_card_alphabet,
-                boolean_card_max=boolean_card_max
+                boolean_card_max=boolean_card_max,
+                mu=mu,
+                sig=sig
             )
             self.length_partition = [self.size_word]
             self.indices_partition = [list(range(self.size_word))]

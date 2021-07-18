@@ -186,7 +186,8 @@ class TreeISAX:
     :param numpy.ndarray data_ts: Sequence array to be inserted
     :param int base_cardinality: The smallest cardinality for encoding iSAX
     :param int max_card_alphabet: if self.boolean_card_max == True, Max cardinality for encoding iSAX
-
+    :param float mu: mean value used to define the isax transformation
+    :param float sig: standard deviation used to define the isax transformation
 
     :ivar int size_word: Number of letters contained in the SAX words indexed in the tree
     :ivar int threshold: Threshold before the separation of a leaf into two leaf nodes
