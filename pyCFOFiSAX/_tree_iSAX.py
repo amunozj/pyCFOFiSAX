@@ -185,15 +185,15 @@ class TreeISAX:
     :param int threshold: The maximum capacity of the nodes of the tree
     :param numpy.ndarray data_ts: Sequence array to be inserted
     :param int base_cardinality: The smallest cardinality for encoding iSAX
-    :param int max_card_alphabet: if self.boolean_card_max == True, Max cardinalite for encoding iSAX
+    :param int max_card_alphabet: if self.boolean_card_max == True, Max cardinality for encoding iSAX
 
 
     :ivar int size_word: Number of letters contained in the SAX words indexed in the tree
-    :ivar int threshold: Threshold before the separation of a sheet into two leaf nodes
+    :ivar int threshold: Threshold before the separation of a leaf into two leaf nodes
     """
 
     def __init__(self, size_word, threshold, data_ts, base_cardinality=2, max_card_alphabet=128,
-                 boolean_card_max=True):
+                 boolean_card_max=True, mu=None, sig=None):
         """
         Class initialization function TreeISAX
 
@@ -216,6 +216,12 @@ class TreeISAX:
 
         # mean, variance of data_ts sequences
         self.mu, self.sig = norm.fit(data_ts)
+
+        if mu is not None:
+            self.mu = mu
+
+        if sig is not None:
+            self.sig = sig
 
         self.min_max = np_empty(shape=(self.size_word, 2))
         slice_size = int(round(data_ts.shape[1]/self.size_word))
@@ -334,7 +340,7 @@ class TreeISAX:
 
         bkpt_ndarray = np_ndarray(shape=(2, len(self.node_list), self.size_word), dtype=float)
         for num_n, node in enumerate(self.node_list):
-            bkpt_ndarray[0][num_n], bkpt_ndarray[1][num_n] = node._do_bkpt()
+            bkpt_ndarray[0][num_n], bkpt_ndarray[1][num_n], _ = node._do_bkpt()
         return bkpt_ndarray
 
     def _minmax_obj_vs_node(self, ntss_tmp, bool_print: bool = False):

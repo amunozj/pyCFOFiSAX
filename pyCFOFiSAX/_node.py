@@ -151,13 +151,16 @@ class RootNode(Node):
     def _do_bkpt(self):
         """
         The _do_bkpt function calculates the min and max bounds of the node on each dimension of the node.
+        as well a the expected value of each node
 
-        :returns: an array containing the min bounds and one containing the max bounds
-        :rtype: numpy.array, numpy.array
+        :returns: an array containing the min bounds, one containing the max bounds, and one containing the
+        expected value
+        :rtype: numpy.array, numpy.array, numpy.array
         """
 
         bkpt_list_min = np_empty(self.tree.size_word)
         bkpt_list_max = np_empty(self.tree.size_word)
+        bkpt_list_exp = np_empty(self.tree.size_word)
         for i, iSAX_letter in enumerate(self.iSAX_word):
             bkpt_tmp = self.tree.isax._card_to_bkpt(iSAX_letter[1])
             # The case where there is no BKPT (root node)
@@ -176,13 +179,16 @@ class RootNode(Node):
             else:
                 bkpt_list_min[i] = bkpt_tmp[iSAX_letter[0]-1]
                 bkpt_list_max[i] = bkpt_tmp[iSAX_letter[0]]
+            # Escalate cardinality by one and find expected value
+            bkpt_tmp = self.tree.isax._card_to_bkpt(iSAX_letter[1]+1)
+            bkpt_list_exp[i] = bkpt_tmp[np.logical_and(bkpt_tmp>bkpt_list_min[i], bkpt_tmp<bkpt_list_max[i])]
 
-        return bkpt_list_min, bkpt_list_max
+        return bkpt_list_min, bkpt_list_max, bkpt_list_exp
 
     def get_min_max_distance(self, node2, metric = 'L2'):
 
         """
-        Function that calculates min, max, and norm distances between two nodes.
+        Function that calculates min, max, norm, and expected distances between two nodes.
 
         :returns: an array containing the three distances
         :rtype: numpy.array
@@ -203,20 +209,23 @@ class RootNode(Node):
         node2_norm_bkpt[node2_bkpt[1]>mu] = node2_bkpt[0][node2_bkpt[1]>mu]
 
         norm_dist = np.abs(node1_norm_bkpt-node2_norm_bkpt)
+        expect_dist = np.abs(node1_bkpt[2]-node2_bkpt[2])
 
         if metric == 'L1':
             min_dist = np.sum(np.min(distance, axis=0))
             max_dist = np.sum(np.max(distance, axis=0))
             norm_dist = np.sum(norm_dist)
+            expect_dist = np.sum(expect_dist)
         else:
             min_dist = np.sqrt(np.sum(np.min(distance, axis=0)**2))
             max_dist = np.sqrt(np.sum(np.max(distance, axis=0)**2))
             norm_dist = np.sqrt(np.sum(norm_dist**2))
+            expect_dist = np.sqrt(np.sum(expect_dist**2))
 
 
         
 
-        return min_dist, max_dist, norm_dist
+        return np.array([min_dist, max_dist, norm_dist, expect_dist])
 
     def get_annotations(self):
         """
