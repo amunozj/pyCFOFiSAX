@@ -235,12 +235,12 @@ class TreeISAX:
             self.min_max[i][1] = np_max(data_slice)+self.mu
 
         self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig)
-        # verif if all values are properly indexable
-        tmp_max = np_max(abs(np_array(data_ts) - self.mu))
-        bkpt_max = abs(self.isax._card_to_bkpt(self.max_card_alphabet)[-1] - self.mu)
-        if tmp_max > bkpt_max:
-            ratio = tmp_max / bkpt_max
-            self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig*ratio)
+        # # verif if all values are properly indexable
+        # tmp_max = np_max(abs(np_array(data_ts) - self.mu))
+        # bkpt_max = abs(self.isax._card_to_bkpt(self.max_card_alphabet)[-1] - self.mu)
+        # if tmp_max > bkpt_max:
+        #     ratio = tmp_max / bkpt_max
+        #     self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig*ratio)
         # and we transmit all this at the root knot
         self.root = RootNode(tree=self, parent=None, sax=[0]*self.size_word,
                              cardinality=np_array([int(self._base_cardinality / 2)] * self.size_word))
