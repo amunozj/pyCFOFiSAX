@@ -1,5 +1,6 @@
 # Authors: Lucas Foulon <lucas.foulon@gmail.com>
 # License: BSD 3 clause
+from collections import defaultdict
 
 from anytree import Node
 from numpy import all as np_all
@@ -180,7 +181,7 @@ class RootNode(Node):
                 bkpt_list_min[i] = bkpt_tmp[iSAX_letter[0]-1]
                 bkpt_list_max[i] = bkpt_tmp[iSAX_letter[0]]
             # Escalate cardinality by one and find expected value
-            bkpt_tmp = self.tree.isax._card_to_bkpt(iSAX_letter[1]+1)
+            bkpt_tmp = self.tree.isax._card_to_bkpt(iSAX_letter[1]*2)
             bkpt_list_exp[i] = bkpt_tmp[np.logical_and(bkpt_tmp>bkpt_list_min[i], bkpt_tmp<bkpt_list_max[i])]
 
         return bkpt_list_min, bkpt_list_max, bkpt_list_exp
@@ -415,6 +416,9 @@ class TerminalNode(RootNode):
         """ Important, the list of PAA sequences that the tree contains"""
         self.sequences = []
         self.annotations = pd.DataFrame()
+        # self.annotations = defaultdict(list)
+        # self.annotations = []
+        
 
     def insert_paa(self, ts_paa, annotation=None):
         """
@@ -426,6 +430,10 @@ class TerminalNode(RootNode):
 
         self.sequences.append(ts_paa)
         if annotation is not None:
+            # self.annotations.append(annotation)
+            # for key in annotation.keys():
+            #     self.annotations[key] += [annotation[key]]
+                
             self.annotations  = pd.concat((self.annotations, annotation)).reset_index(drop=True)
         """ indicator maj """
         self.nb_sequences += 1
