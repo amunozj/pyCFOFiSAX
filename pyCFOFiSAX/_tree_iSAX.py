@@ -194,7 +194,7 @@ class TreeISAX:
     """
 
     def __init__(self, size_word, threshold, data_ts, base_cardinality=2, max_card_alphabet=128,
-                 boolean_card_max=True, mu=None, sig=None):
+                 boolean_card_max=True, mu=None, sig=None, minmax_factor=10):
         """
         Class initialization function TreeISAX
 
@@ -225,14 +225,14 @@ class TreeISAX:
             self.sig = sig
 
         self.min_max = np_empty(shape=(self.size_word, 2))
-        slice_size = int(round(data_ts.shape[1]/self.size_word))
+        # slice_size = int(round(data_ts.shape[1]/self.size_word))
         for i in range(0,self.size_word):            
-            if i < self.size_word-1:
-                data_slice = data_ts[:, i*slice_size:(i+1)*slice_size]
-            else:
-                data_slice = data_ts[:, i*slice_size:data_ts.shape[1]]
-            self.min_max[i][0] = np_min(data_slice)-self.mu
-            self.min_max[i][1] = np_max(data_slice)+self.mu
+            # if i < self.size_word-1:
+            #     data_slice = data_ts[:, i*slice_size:(i+1)*slice_size]
+            # else:
+            #     data_slice = data_ts[:, i*slice_size:data_ts.shape[1]]
+            self.min_max[i][0] = self.mu - minmax_factor*self.sig
+            self.min_max[i][1] = self.mu + minmax_factor*self.sig
 
         self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig)
         # # verif if all values are properly indexable
