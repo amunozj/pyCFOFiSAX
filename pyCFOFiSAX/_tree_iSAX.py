@@ -547,7 +547,7 @@ class TreeISAX:
         """
         
         node_list = []
-        for node in RenderTree(self.root):
+        for _, _, node in RenderTree(self.root):
             if node.level == level:
                 node_list.append(node)
             elif node.level < level and node.terminal:
