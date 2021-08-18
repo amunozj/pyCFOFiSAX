@@ -235,9 +235,14 @@ class RootNode(Node):
         :returns: Annotations
         :rtype: numpy.ndarray
         """
-        annotations = pd.DataFrame()
+
+        
+        annotations = defaultdict(list)
         for node in self.nodes:
-            annotations = pd.concat((annotations,node.get_annotations() )).reset_index(drop=True)
+
+            node_annotations = node.get_annotations()
+            for key, value in node_annotations.items():
+                annotations[key].append(value)
 
         return annotations
 
@@ -415,10 +420,8 @@ class TerminalNode(RootNode):
 
         """ Important, the list of PAA sequences that the tree contains"""
         self.sequences = []
-        self.annotations = pd.DataFrame()
-        # self.annotations = defaultdict(list)
-        # self.annotations = []
-        
+        self.annotations = defaultdict(list)
+
 
     def insert_paa(self, ts_paa, annotation=None):
         """
@@ -430,11 +433,9 @@ class TerminalNode(RootNode):
 
         self.sequences.append(ts_paa)
         if annotation is not None:
-            # self.annotations.append(annotation)
-            # for key in annotation.keys():
-            #     self.annotations[key] += [annotation[key]]
-                
-            self.annotations  = pd.concat((self.annotations, annotation)).reset_index(drop=True)
+            for key, value in annotation.items():
+                self.annotations[key].append(value)
+
         """ indicator maj """
         self.nb_sequences += 1
         # calculate mean and std
@@ -458,7 +459,7 @@ class TerminalNode(RootNode):
         :rtype: list
         """
         annotations = self.annotations
-        annotations['Node Name'] = self.short_name
+        # annotations['Node Name'] = self.short_name
         return annotations
 
     def get_sequences(self):
