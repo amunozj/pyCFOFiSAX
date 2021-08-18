@@ -110,7 +110,13 @@ class RootNode(Node):
                     # For each of the sequences of the current leaf are inserted its sequences in the new internal node
                     # This internal node will create one or more leaves to insert these sequences
                     for j,ts in enumerate(current_node.sequences):
-                        new_node.insert_paa(ts, current_node.annotations.loc[[j],:])
+
+                        entry = {}
+                        for key, value in current_node.annotations.items():
+                            entry[key] = value[j]
+                            
+                        new_node.insert_paa(ts, entry)
+                        
                     # and we delete the current leaf from the list of nodes
                     self.nodes.remove(current_node)
                     # that we also remove from Dict
