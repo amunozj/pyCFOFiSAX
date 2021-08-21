@@ -105,7 +105,7 @@ class RootNode(Node):
                 # But otherwise (we exceed the max threshold and the leaf is splitable)
                 else:
                     # Creation of the new internal node
-                    new_node = InternalNode(self.tree, current_node.parent, np_copy(current_node.sax),
+                    new_node = InternalNode(self.tree, current_node.parent, current_node.sax,
                                             np_copy(current_node.cardinality), current_node.sequences)
                     # We insert the new sequence in this new internal node
                     new_node.insert_paa(new_paa, annotation=annotation, parallel=parallel)
@@ -165,7 +165,7 @@ class RootNode(Node):
         """
 
         # Creation of the new internal node
-        new_node = InternalNode(self.tree, node.parent, np_copy(node.sax),
+        new_node = InternalNode(node.tree, node.parent, node.sax,
                                 np_copy(node.cardinality), node.sequences)
 
         # For each of the sequences of the current leaf are inserted its sequences in the new internal node
@@ -177,16 +177,17 @@ class RootNode(Node):
                 
             new_node.insert_paa(ts, entry)
 
-        # and we delete the current leaf from the list of nodes
-        self.nodes.remove(node)
-        # that we also remove from Dict
-        del self.key_nodes[str(node.sax)]
-        # and we add to the dict the new internal node
-        self.key_nodes[str(node.sax)] = new_node
-        self.nodes.append(new_node)
-        node.parent = None
-        # and we definitely delete the current leaf
-        del node 
+        # # and we delete the current leaf from the list of nodes
+        # self.nodes.remove(node)
+        # # that we also remove from Dict
+        # del self.key_nodes[str(node.sax)]
+        # # and we add to the dict the new internal node
+        # self.key_nodes[str(node.sax)] = new_node
+        # self.nodes.append(new_node)
+        # node.parent = None
+        # # and we definitely delete the current leaf
+        # del node
+        return new_node
 
     def _do_bkpt(self):
         """
