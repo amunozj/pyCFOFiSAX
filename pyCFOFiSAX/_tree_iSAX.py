@@ -35,13 +35,15 @@ from numpy import logical_not as np_logical_not
 from numpy import linspace as np_linspace
 from numpy import searchsorted as np_searchsorted
 from numpy import multiply as np_multiply
-from numpy import round
+
+from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
 
 from scipy.stats import norm as scipy_norm
 
 from bisect import bisect as bisect_bisect
 
-from sys import getsizeof
+from sys import getsizeof, setswitchinterval
 
 from time import time as time_time
 from sys import stdout
@@ -246,7 +248,7 @@ class TreeISAX:
                              cardinality=np_array([int(self._base_cardinality / 2)] * self.size_word))
         self.num_nodes = 1
 
-        # Attributes for pre-treatment
+        # Attributes for preprocessing
         self._minmax_nodes_computed = False
         self.node_list = None
         self.node_list_leaf = None
@@ -293,6 +295,29 @@ class TreeISAX:
             self.root.insert_paa(new_paa, annotation=annotation, parallel=parallel)
             self._new_insertion_after_preproc = True
             self._new_insertion_after_minmax_nodes = True
+
+
+    def parallel_escalation(self):
+        """
+        A function that triggers a full cardinality escalation underneath the root node using parallel processes
+        """
+
+        escalated_nodes = process_map(self.root.escalate_node, self.root.key_nodes.values(), desc='Escalating nodes...')
+
+        for (sax_key, current_node), escalated_node in zip(self.root.key_nodes.items(), escalated_nodes):
+            
+            escalated_node.parent = self.root
+            # and we delete the current leaf from the list of nodes
+            self.root.nodes.remove(current_node)
+            # that we also remove from Dict
+            # del self.root.key_nodes[sax_key]
+            # and we add to the dict the new internal node
+            self.root.key_nodes[sax_key] = escalated_node
+            self.root.nodes.append(escalated_node)
+            current_node.parent = None
+            # and we definitely delete the current leaf
+            del current_node
+
 
     def preprocessing_for_icfof(self, ntss_tmp, bool_print: bool = False, count_num_node: bool = False):
         """

@@ -12,7 +12,6 @@ from numpy import zeros as np_zeros
 from numpy import array as np_array
 from numpy import empty as np_empty
 from numpy import argmin as np_argmin
-import pandas as pd
 import numpy as np
 
 """ Module for grouping the three types of nodes used by the Isax tree """
@@ -157,15 +156,17 @@ class RootNode(Node):
             self.sn += (new_paa - mean_moins_1) * (new_paa - self.mean)
             self.std = np_sqrt(self.sn / self.nb_sequences)
 
-    def escalate(self, node):
+    def escalate_node(self, node):
         """
         A function that triggers a full cardinality escalation underneath a node
 
         :param node: The node to escalate
+
+        :return escalated_node: a fully escalated node 
         """
 
         # Creation of the new internal node
-        new_node = InternalNode(node.tree, node.parent, node.sax,
+        new_node = InternalNode(self.tree, self, node.sax,
                                 np_copy(node.cardinality), node.sequences)
 
         # For each of the sequences of the current leaf are inserted its sequences in the new internal node
@@ -175,19 +176,10 @@ class RootNode(Node):
             for key, value in node.annotations.items():
                 entry[key] = value[j]
                 
-            new_node.insert_paa(ts, entry)
+            new_node.insert_paa(ts, annotation=entry)
+            
+        return new_node       
 
-        # # and we delete the current leaf from the list of nodes
-        # self.nodes.remove(node)
-        # # that we also remove from Dict
-        # del self.key_nodes[str(node.sax)]
-        # # and we add to the dict the new internal node
-        # self.key_nodes[str(node.sax)] = new_node
-        # self.nodes.append(new_node)
-        # node.parent = None
-        # # and we definitely delete the current leaf
-        # del node
-        return new_node
 
     def _do_bkpt(self):
         """
@@ -282,7 +274,7 @@ class RootNode(Node):
 
             node_annotations = node.get_annotations()
             for key, value in node_annotations.items():
-                annotations[key].append(value)
+                annotations[key] += value
 
         return annotations
 

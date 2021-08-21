@@ -1,23 +1,10 @@
 import cdflib
 import numpy as np
 
-from tqdm import tqdm
-from pathlib import Path
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-import matplotlib.lines as mlines
-from multiprocessing import Pool
-from scipy.stats import norm
-
-from astropy.time import Time 
-
-import spiceypy as spice
-from mpl_toolkits.mplot3d import Axes3D 
 
 
-from pyts.approximation import SymbolicAggregateApproximation
 
 
 import sys
@@ -81,7 +68,14 @@ sw_forest = ForestISAX(size_word=10,
                            data_ts=ts,
                            base_cardinality=2, number_tree=1)
 
-sw_forest.index_data(ts, annotation=ts_loc)
+sw_forest.index_data(ts, parallel=True)
+
+# test = sw_forest.forest[0].root.escalate_node(sw_forest.forest[0].root.nodes[0])
+# print(test)
+
+sw_forest.forest[0].parallel_escalation()
+
+# print(test)
 
 size_word = 10
 mu = np.mean(ts)
