@@ -265,30 +265,32 @@ class TreeISAX:
         self._new_insertion_after_preproc = False
         self._new_insertion_after_minmax_nodes = False
 
-    def insert(self, new_sequence, annotation=None):
+    def insert(self, new_sequence, annotation=None, parallel=False):
         """
         The converted insert function in PAA then call the function insert_paa
 
         :param numpy.array new_sequence: The new sequence to be inserted
         :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
+        :param boolean parallel: if True, it runs the indexing of the tree at minimum cardinality and waits for the parallel escalation
         """
         
         # convert to paa
         paa = self.isax.transform_paa([new_sequence])[0]
-        self.insert_paa(paa)
+        self.insert_paa(paa, annotation=None, parallel=parallel)
 
-    def insert_paa(self, new_paa, annotation=None):
+    def insert_paa(self, new_paa, annotation=None, parallel=False):
         """
         The insert function that directly calls that of its root node
 
         :param numpy.array new_paa: The new sequence to be inserted
-        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf        
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
+        :param boolean parallel: if True, it runs the indexing of the tree at minimum cardinality and waits for the parallel escalation       
         """
 
         if len(new_paa) < self.size_word:
             print("Error !! "+new_paa+" is smaller than size.word = "+self.size_word+". FIN")
         else:
-            self.root.insert_paa(new_paa, annotation=annotation)
+            self.root.insert_paa(new_paa, annotation=annotation, parallel=parallel)
             self._new_insertion_after_preproc = True
             self._new_insertion_after_minmax_nodes = True
 

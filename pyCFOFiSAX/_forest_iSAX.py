@@ -124,13 +124,14 @@ class ForestISAX:
                     boolean_card_max=boolean_card_max
                 )
 
-    def index_data(self, new_sequences: np_ndarray, annotation=None):
+    def index_data(self, new_sequences: np_ndarray, annotation=None, parallel=False):
         """
         The Index_Data function allows you to insert a large number of sequences
 
         :param numpy.ndarray new_sequences: The sequences to be inserted
-        :param pandas.DataFrame annotation: Pandas dataframe with annotations to be added to each item in a leaf
-
+        :param dictionary annotation: Dictionary of lists with annotations to be added to each item in a leaf
+        :param boolean parallel: if True, it runs the indexing of the tree at minimum cardinality and waits for the parallel escalation
+        
         :returns: The number of sequences (sub sequences) insert into the tree (in the trees)
         :rtype: numpy.array
         """
@@ -155,7 +156,7 @@ class ForestISAX:
                     for key, value in annotation.items():
                         entry[key] = value[j]
 
-                tree.insert_paa(npa_tp, annotation=entry)
+                tree.insert_paa(npa_tp, annotation=entry, parallel=parallel)
                 cmpt_insert[i] += 1
 
         # Returns array[tree_index] with the number of inserted objects for each tree
