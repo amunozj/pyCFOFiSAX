@@ -304,13 +304,13 @@ class TreeISAX:
 
         escalated_nodes = process_map(self.root.escalate_node, self.root.key_nodes.values(), desc='Escalating nodes...')
 
-        for (sax_key, current_node), escalated_node in zip(self.root.key_nodes.items(), escalated_nodes):
+        for (sax_key, current_node), escalated_node in list(zip(self.root.key_nodes.items(), escalated_nodes)):
             
             escalated_node.parent = self.root
             # and we delete the current leaf from the list of nodes
             self.root.nodes.remove(current_node)
             # that we also remove from Dict
-            # del self.root.key_nodes[sax_key]
+            del self.root.key_nodes[sax_key]
             # and we add to the dict the new internal node
             self.root.key_nodes[sax_key] = escalated_node
             self.root.nodes.append(escalated_node)
