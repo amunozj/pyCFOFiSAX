@@ -1,17 +1,6 @@
-# CFOF score computation via iSAX
+# CFOF score computation via iSAX with Anotations
 
-[![Documentation Status](https://readthedocs.org/projects/pycfofisax/badge/?version=main)](https://pycfofisax.readthedocs.io/fr/main/?badge=main)
-
-[![PyPI](https://github.com/luk-f/pyCFOFiSAX/actions/workflows/python-publish.yml/badge.svg)](https://github.com/luk-f/pyCFOFiSAX/actions/workflows/python-publish.yml)
-
-Lucas' PhD projects \
-2017-2020
-
-## To start
-
-### Installation via PyPI
-
-Run `pip install pyCFOFiSAX` or `python3 -m pip install pyCFOFiSAX`.
+iSAX implementation based on the PhD work of Lucas 
 
 ### Manual installation
 
