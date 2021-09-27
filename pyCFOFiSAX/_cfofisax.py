@@ -12,10 +12,10 @@ from pyCFOFiSAX import ForestISAX
 
 def _convert_rho_to_krho(rho, size_ds: int):
     """
-    Converts the parameter ``rho`` (also noted: math:`\\varrho`) between :math:`0 < \\varrho < 1` in a value between 0 and the size of the reference game.
+    Converts the ``rho`` parameter (also noted: math:`\\varrho`) between :math:`0 < \\varrho < 1` in a value between 0 and the size of the reference dataset.
 
-    :param list rho: The values (s) of :math:`\\varrho` to convert
-    :param int size_ds: The size of the reference game
+    :param list rho: The value(s) of :math:`\\varrho` to be converted
+    :param int size_ds: The size of the reference dataset
 
     :returns: the list of :math:`\\varrho \\times size\_ds`
     :rtype: list
@@ -31,13 +31,13 @@ def _convert_rho_to_krho(rho, size_ds: int):
 
 def score_by_listvrang(k_list_result, k_rho):
     """
-    Calculation of CFOF approximations from the vrang list and according to the value of :math:`\\varrho` contained in the ``k_rho`` list.
-    A CFOF approximation obtained for each :math:`\\varrho` contained in the list``k_rho``.
+    CFOF approximations computation from the vrang list and according to the value of :math:`\\varrho` contained in the ``k_rho`` list.
+    CFOF approximation obtained for each :math:`\\varrho` contained in the list``k_rho``.
 
-    :param list(float) k_list_result: The list of vrang for the sequence to be evaluated
-    :param list(float) k_rho: The list of :math:`\\varrho` for calculation of CFOF approximations.
+    :param list(float) k_list_result: The list of vrang of the sequence to be evaluated
+    :param list(float) k_rho: The list of :math:`\\varrho` for CFOF score approximations computation.
 
-    :returns: The list of CFOF approximations
+    :returns: The list of CFOF score approximations
     :rtype: list(float)
     """
 
@@ -61,15 +61,15 @@ def score_by_listvrang(k_list_result, k_rho):
 
 class CFOFiSAX:
     """
-    The class for approximation *i*\ CFOF using indexing trees *i*\ SAX.
-    Contains the tree forest *i*\ SAX.
+    The class for *i*\ CFOF approximation using *i*\ SAX index trees.
+    Contains the *i*\ SAX tree forest.
     """
 
     def __init__(self):
         """
-        Initialization function of the CFOFiSAX class.
+        Initialization function of the CFOF*i*\ SAX class.
 
-        :returns: contains only the attribute ``forest_isax = None``.
+        :returns: contains only the ``forest_isax = None``. attribute
         :rtype: CFOFiSAX
         """
 
@@ -85,13 +85,13 @@ class CFOFiSAX:
         Requires the parameters of the class :class:`~pyCFOFiSAX._forest_iSAX.ForestISAX`.
 
         :param int size_word: The size of the SAX words
-        :param int threshold: The maximum threshold of nodes
-        :param numpy.ndarray data_ts: The sequences to be inserted to extract the stats
-        :param int base_cardinality: The smallest cardinality for encoding *i*\ SAX
-        :param int number_tree: The number of TreeISAX trees in the forest
-        :param list indices_partition: A list of list of indices where, for each tree, specifies the indices of the sequences to be inserted
-        :param int max_card_alphabet: if ``boolean_card_max == True``, The maximum cardinality of encoding *i*\ SAX in each tree
-        :param bool boolean_card_max: if ``== True``, Defines a maximum cardinality for encoding *i*\ SAX sequences in each of the trees
+        :param int threshold: The threshold, maximal size of nodes
+        :param numpy.ndarray data_ts: The sequences to be inserted, to compute the stats of dataset
+        :param int base_cardinality: The smallest cardinality to encode *i*\ SAX
+        :param int number_tree: The number of *i*\ SAX trees in the forest
+        :param list indices_partition: A list of indices list where, for each tree, specifies the indices of the sequences to be inserted
+        :param int max_card_alphabet: if ``boolean_card_max == True``, the maximum cardinality of *i*\ SAX encoding in each tree
+        :param bool boolean_card_max: if ``== True``, defines maximum cardinality for *i*\ SAX sequences encoding in each of the trees
         """
 
         self.forest_isax = ForestISAX(size_word, threshold, data_ts, base_cardinality, number_tree,
@@ -100,19 +100,19 @@ class CFOFiSAX:
     def score_icfof(self, query: np_array, ntss: np_ndarray, rho=[0.001, 0.005, 0.01, 0.05, 0.1],
                     each_tree_score: bool = False, fast_method: bool = True):
         """
-        Calculate *i*\ CFOF Approximations.
+        Compute the *i*\ CFOF approximations.
         Call one of the two functions according to the parameter ``fast_method`` :
          - if ``True`` (default) : :func:`~pyCFOFiSAX._forest_iSAX.ForestISAX.vranglist_by_idtree_faster`
          - if ``False`` : :func:`~pyCFOFiSAX._forest_iSAX.ForestISAX.vranglist_by_idtree`
-        Then sort the vrang list to get CFOF approximations based on ``rho`` parameter values.
+        Then sort the vrang list to get CFOF scores approximations based on ``rho`` parameter values.
 
         :param numpy.array query: The sequence to be evaluated
         :param numpy.ndarray ntss: Reference sequences
-        :param list rho: Rho values for calculating approximation
-        :param bool each_tree_score: if vrai, teturns the scores obtained in each of the trees
-        :param bool fast_method: if vrai, uses the NUMPY functions for the calculation, otherwise travels the tree via a FIFO list of nodes
+        :param list rho: Rho values for the computation of approximations
+        :param bool each_tree_score: if `True`, returns the scores obtained in each of the trees
+        :param bool fast_method: if `True`, uses the numpy functions for computation, otherwise goes  through the tree via a FIFO list of nodes
 
-        :returns: *i*\ CFOF approximations
+        :returns: *i*\ CFOF score approximations
         :rtype: numpy.ndarray
         """
 

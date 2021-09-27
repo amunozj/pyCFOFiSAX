@@ -63,8 +63,8 @@ def vrang_seq_ref(distance, max_array, min_array, cdf_mean, cdf_std, num_ts_by_n
     :param np_array cdf_mean: The average distances between the nodes of the tree and the reference sequence
     :param np_array cdf_std: Dispersion of distances in each leaf node
     :param np_array num_ts_by_node: The number of sequence in each node sheet
-    :param np_array index_cdf_bin: l'index de la CDF ``cdf_bins``
-    :param np_array cdf_bins: Normal law cdf values centered at the origin and gap-type 1
+    :param np_array index_cdf_bin: index of the ``cdf_bins`` CDF 
+    :param np_array cdf_bins: Normal distribution cdf values centered at the origin and standard deviation
 
     :returns: le vrang
     :rtype: int
@@ -125,7 +125,7 @@ def vrang_list_for_all_seq_ref(len_seq_list, distance,
     :param np_array cdf_std: Dispersion of distances in each leaf node
     :param np_array num_ts_by_node: The number of sequence in each node sheet
     :param np_array index_cdf_bin: The index of the CDF ``cdf_bins``
-    :param np_array cdf_bins: Normal law cdf values centered at the origin and gap-type 1
+    :param np_array cdf_bins: Normal distribution cdf values centered at the origin and standard deviation
 
     :returns: la liste des vrang
     :rtype: np_array
@@ -217,7 +217,7 @@ class TreeISAX:
         self.boolean_card_max = boolean_card_max
         self.max_card_alphabet = max_card_alphabet
 
-        # mean, variance of data_ts sequences
+        # mean, standard deviation of data_ts sequences
         self.mu, self.sig = norm.fit(data_ts)
 
         if mu is not None:
@@ -254,7 +254,7 @@ class TreeISAX:
         self.node_list_leaf = None
         self.node_leaf_ndarray_mean = None
 
-        # Attributes for calculation *i*\ CFOF
+        # Attributes for *i*\ CFOF computation
         self._preprocessing_computed = False
         self.min_array = None
         self.max_array = None
@@ -263,13 +263,13 @@ class TreeISAX:
         self.cdf_mean = None
         self.cdf_std = None
 
-        # Attribute after an update of the tree
+        # Boolean value passing True after an update of the tree
         self._new_insertion_after_preproc = False
         self._new_insertion_after_minmax_nodes = False
 
     def insert(self, new_sequence, annotation=None, parallel=False):
         """
-        The converted insert function in PAA then call the function insert_paa
+        This insert function convert new sequence in PAA values then call the function insert_paa
 
         :param numpy.array new_sequence: The new sequence to be inserted
         :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
@@ -282,7 +282,7 @@ class TreeISAX:
 
     def insert_paa(self, new_paa, annotation=None, parallel=False):
         """
-        The insert function that directly calls that of its root node
+        The insert function that directly calls the function of its root node
 
         :param numpy.array new_paa: The new sequence to be inserted
         :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
@@ -321,12 +321,12 @@ class TreeISAX:
 
     def preprocessing_for_icfof(self, ntss_tmp, bool_print: bool = False, count_num_node: bool = False):
         """
-        Allows us to appeal, for the ``id_tree`` tree to the two methods of pre-treatments:
+        Allows us to appeal, for the id_tree tree, to the two methods of preprocessing:
          * :func:`~pyCFOFiSAX.tree_iSAX.TreeISAX._minmax_obj_vs_node`,
          * :func:`~pyCFOFiSAX.tree_iSAX.TreeISAX.distrib_nn_for_cdf`.
 
         :param ntss_tmp: Reference sequences
-        :param boolean bool_print: if True, Displays the times of each pre-treatment step
+        :param boolean bool_print: if True, Displays the times of each preprocessing step
         :param boolean count_num_node: if True, count the number of nodes
 
         :returns: if ``count_num_node`` True, Returns the number of nodes in the tree
@@ -357,10 +357,10 @@ class TreeISAX:
 
     def _minmax_nodes(self):
         """
-        Returns the bounds of the nodes of the tree.
+        Returns the breakpoints of the nodes of the tree.
         Uses :func:`~pyCFOFiSAX.node.RootNode._do_bkpt`.
 
-        :returns: The min and max bounds of the nodes of the tree
+        :returns: The min and max breakpoints of the nodes of the tree
         :rtype: numpy.ndarray
         """
 
@@ -373,10 +373,10 @@ class TreeISAX:
 
     def _minmax_obj_vs_node(self, ntss_tmp, bool_print: bool = False):
         """
-        Calculates the distances min and max between the sequences ``ntss_tmp`` and the nodes of the tree.
+        Compute distance min and max between the sequences ``ntss_tmp`` and the nodes of the tree.
 
         :param numpy.ndarray ntss_tmp: Reference sequences
-        :param boolean bool_print: if True, Displays the times of each pre-treatment step
+        :param boolean bool_print: if True, Displays the times of each preprocessing step
 
         :returns: Minimum distances between sequences and nodes, Maximum distances between sequences and nodes
         :rtype: numpy.ndarray, numpy.ndarray
@@ -435,8 +435,8 @@ class TreeISAX:
 
     def distrib_nn_for_cdf(self, ntss_tmp, bool_print: bool = False):
         """
-        Calculates the two indicators, average and standard deviation of the distances, necessary for the use of the CDF of the normal law.
-        The calculation of these indicators are described in `Scoring Message Stream Anomalies in Railway Communication Systems, L.Foulon et al., 2019, ICDMWorkshop <https://ieeexplore.ieee.org/abstract/document/8955558>`_.
+        Calculates the two indicators, average and standard deviation of the distances, necessary for the use of the CDF of the normal distribution.
+        The computation of these indicators are described in `Scoring Message Stream Anomalies in Railway Communication Systems, L.Foulon et al., 2019, ICDMWorkshop <https://ieeexplore.ieee.org/abstract/document/8955558>`_.
 
         :param numpy.ndarray ntss_tmp: Reference sequences
         :param boolean bool_print: and True, Displays the nodes stats on the standard output
@@ -495,7 +495,7 @@ class TreeISAX:
 
     def _minmax_obj_vs_nodeleaf(self):
         """
-        Calculates the min and max distances between the ``ntss_tmp`` sequences and the leaf nodes of the tree.
+        Computes the min and max distances between the ``ntss_tmp`` sequences and the leaf nodes of the tree.
 
         .. WARNING::
             Attention must be executed after :func:`~pyCFOFiSAX._tree_iSAX.TreeISAX._minmax_obj_vs_node` and :func:`~pyCFOFiSAX._tree_iSAX.TreeISAX.distrib_nn_for_cdf`.
@@ -508,7 +508,7 @@ class TreeISAX:
 
     def get_level_max(self):
         """
-        Function to return the max level Switching root level 0
+        Function to return the max level considering root level = 0
 
         :returns: The max depth level
         :rtype: int
@@ -521,7 +521,7 @@ class TreeISAX:
 
     def get_width_of_level(self, level: int):
         """
-        Function to return the width of a root level level level 0
+        Return the width of a level, considering root level = 0
 
         :returns: the number of node on the level of the tree
         :rtype: int
@@ -534,7 +534,7 @@ class TreeISAX:
 
     def get_width_of_all_level(self):
         """
-        Function to return the width of all levels in a list that knows root level 0
+        Function to return the width of all levels in a list, considering root level = 0
 
         :returns: The number of node on each level of the tree
         :rtype: list
@@ -549,11 +549,11 @@ class TreeISAX:
 
     def get_nodes_of_level(self, level: int):
         """
-        Function to return the nodes of a level knowing root level 0
+        Function to return the nodes of a level, considering root level = 0
 
         :param int level: The level of the tree to evaluate
 
-        :returns: The nodes of the level-ie level of the tree
+        :returns: The nodes of the ith level of the three
         :rtype: list
         """
         
@@ -600,7 +600,7 @@ class TreeISAX:
 
     def count_nodes_by_tree(self):
         """
-        The COUNT_NODES_BY_TREE function returns the number of nodes and sheet nodes of the shaft.
+        The COUNT_NODES_BY_TREE function returns the number of nodes and leaf nodes of the shaft.
         Uses :func:`~pyCFOFiSAX.tree_iSAX.TreeISAX.get_number_internal_and_terminal`.
 
         :returns: the number of internal nodes, the number of leaves nodes
@@ -613,9 +613,9 @@ class TreeISAX:
 
     def get_list_nodes_and_barycentre(self):
         """
-        Returns Lists of Nodes and Barketters
+        Returns Lists of Nodes and centroids
 
-        :returns: List of nodes, List of Leaves Nodes, List of Leave Barycenters
+        :returns: List of nodes, List of Leaf Nodes, List of Leaf centroids
         :rtype: list, list, list
         """
 
@@ -658,7 +658,7 @@ class TreeISAX:
 
     def get_size(self):
         """
-        Function to return the memory size of the shaft, nodes
+        Function to return the memory size of the tree, nodes
         and sequences contained in the tree
 
         :returns: Total memory size, nodes' memory size, memory size of the sequences
