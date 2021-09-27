@@ -61,7 +61,7 @@ class IndexableSymbolicAggregateApproximation(PiecewiseAggregateApproximation):
 
     def _card_to_bkpt(self, max_cardinality):
         """
-        Returns the breakpoints associated with the cardinations <= max_cardinality.
+        Returns the breakpoints associated with the cardinality <= max_cardinality.
         The function calculates and stores the BKPT if they have never been calculated.
 
         :param int max_cardinality: Maximum cardinality

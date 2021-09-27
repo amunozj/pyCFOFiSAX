@@ -4,7 +4,7 @@
 from pyCFOFiSAX._node import RootNode
 from pyCFOFiSAX._isax import IndexableSymbolicAggregateApproximation
 
-from anytree import RenderTree
+from anytree import RenderTree, LevelOrderIter
 
 from scipy.stats import norm
 from scipy.spatial.distance import cdist
@@ -23,6 +23,7 @@ from numpy import square as np_square
 from numpy import divide as np_divide
 from numpy import mean as np_mean
 from numpy import max as np_max
+from numpy import min as np_min
 from numpy import minimum as np_minimum
 from numpy import maximum as np_maximum
 from numpy import place as np_place
@@ -35,11 +36,14 @@ from numpy import linspace as np_linspace
 from numpy import searchsorted as np_searchsorted
 from numpy import multiply as np_multiply
 
+from tqdm import tqdm
+from tqdm.contrib.concurrent import process_map
+
 from scipy.stats import norm as scipy_norm
 
 from bisect import bisect as bisect_bisect
 
-from sys import getsizeof
+from sys import getsizeof, setswitchinterval
 
 from time import time as time_time
 from sys import stdout
@@ -71,7 +75,7 @@ def vrang_seq_ref(distance, max_array, min_array, cdf_mean, cdf_std, num_ts_by_n
         np_greater(distance, max_array)
     ].sum()
 
-    # All Borderline nodes
+    # tous les nœuds borderlines
     boolean_grp = np_logical_and(np_less_equal(distance, max_array),
                                  np_greater(distance, min_array))
 
@@ -172,7 +176,7 @@ def nodes_visited_for_all_seq_ref(len_seq_list, distance,
 
 class TreeISAX:
     """
-    La classe TreeISAX contenant
+    The TreeISAX class contains
      * ISAX distribution of sequences to index
      * and towards the first root node
 
@@ -184,14 +188,15 @@ class TreeISAX:
     :param numpy.ndarray data_ts: Sequence array to be inserted
     :param int base_cardinality: The smallest cardinality for encoding iSAX
     :param int max_card_alphabet: if self.boolean_card_max == True, Max cardinality for encoding iSAX
-
+    :param float mu: mean value used to define the isax transformation
+    :param float sig: standard deviation used to define the isax transformation
 
     :ivar int size_word: Number of letters contained in the SAX words indexed in the tree
-    :ivar int threshold: Threshold before the separation of a sheet into two leaf nodes
+    :ivar int threshold: Threshold before the separation of a leaf into two leaf nodes
     """
 
     def __init__(self, size_word, threshold, data_ts, base_cardinality=2, max_card_alphabet=128,
-                 boolean_card_max=True):
+                 boolean_card_max=True, mu=None, sig=None, minmax_factor=10):
         """
         Class initialization function TreeISAX
 
@@ -215,19 +220,30 @@ class TreeISAX:
         # mean, standard deviation of data_ts sequences
         self.mu, self.sig = norm.fit(data_ts)
 
+        if mu is not None:
+            self.mu = mu
+
+        if sig is not None:
+            self.sig = sig
+
         self.min_max = np_empty(shape=(self.size_word, 2))
-        for i, dim in enumerate(np_array(data_ts).T.tolist()):
-            self.min_max[i][0] = min(dim)-self.mu
-            self.min_max[i][1] = max(dim)+self.mu
+        # slice_size = int(round(data_ts.shape[1]/self.size_word))
+        for i in range(0,self.size_word):            
+            # if i < self.size_word-1:
+            #     data_slice = data_ts[:, i*slice_size:(i+1)*slice_size]
+            # else:
+            #     data_slice = data_ts[:, i*slice_size:data_ts.shape[1]]
+            self.min_max[i][0] = self.mu - minmax_factor*self.sig
+            self.min_max[i][1] = self.mu + minmax_factor*self.sig
 
         self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig)
-        # verif if all values are properly indexable
-        tmp_max = np_max(abs(np_array(data_ts) - self.mu))
-        bkpt_max = abs(self.isax._card_to_bkpt(self.max_card_alphabet)[-1] - self.mu)
-        if tmp_max > bkpt_max:
-            ratio = tmp_max / bkpt_max
-            self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig*ratio)
-        # and we transmit all this at the root node
+        # # verif if all values are properly indexable
+        # tmp_max = np_max(abs(np_array(data_ts) - self.mu))
+        # bkpt_max = abs(self.isax._card_to_bkpt(self.max_card_alphabet)[-1] - self.mu)
+        # if tmp_max > bkpt_max:
+        #     ratio = tmp_max / bkpt_max
+        #     self.isax = IndexableSymbolicAggregateApproximation(self.size_word, mean=self.mu, std=self.sig*ratio)
+        # and we transmit all this at the root knot
         self.root = RootNode(tree=self, parent=None, sax=[0]*self.size_word,
                              cardinality=np_array([int(self._base_cardinality / 2)] * self.size_word))
         self.num_nodes = 1
@@ -251,30 +267,57 @@ class TreeISAX:
         self._new_insertion_after_preproc = False
         self._new_insertion_after_minmax_nodes = False
 
-    def insert(self, new_sequence):
+    def insert(self, new_sequence, annotation=None, parallel=False):
         """
         This insert function convert new sequence in PAA values then call the function insert_paa
 
         :param numpy.array new_sequence: The new sequence to be inserted
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
+        :param boolean parallel: if True, it runs the indexing of the tree at minimum cardinality and waits for the parallel escalation
         """
         
         # convert to paa
         paa = self.isax.transform_paa([new_sequence])[0]
-        self.insert_paa(paa)
+        self.insert_paa(paa, annotation=None, parallel=parallel)
 
-    def insert_paa(self, new_paa):
+    def insert_paa(self, new_paa, annotation=None, parallel=False):
         """
         The insert function that directly calls the function of its root node
 
         :param numpy.array new_paa: The new sequence to be inserted
+        :param pandas.DataFrame annotation: annotation to be added to each item in a leaf
+        :param boolean parallel: if True, it runs the indexing of the tree at minimum cardinality and waits for the parallel escalation       
         """
 
         if len(new_paa) < self.size_word:
             print("Error !! "+new_paa+" is smaller than size.word = "+self.size_word+". FIN")
         else:
-            self.root.insert_paa(new_paa)
+            self.root.insert_paa(new_paa, annotation=annotation, parallel=parallel)
             self._new_insertion_after_preproc = True
             self._new_insertion_after_minmax_nodes = True
+
+
+    def parallel_escalation(self):
+        """
+        A function that triggers a full cardinality escalation underneath the root node using parallel processes
+        """
+
+        escalated_nodes = process_map(self.root.escalate_node, self.root.key_nodes.values(), desc='Escalating nodes...')
+
+        for (sax_key, current_node), escalated_node in list(zip(self.root.key_nodes.items(), escalated_nodes)):
+            
+            escalated_node.parent = self.root
+            # and we delete the current leaf from the list of nodes
+            self.root.nodes.remove(current_node)
+            # that we also remove from Dict
+            del self.root.key_nodes[sax_key]
+            # and we add to the dict the new internal node
+            self.root.key_nodes[sax_key] = escalated_node
+            self.root.nodes.append(escalated_node)
+            current_node.parent = None
+            # and we definitely delete the current leaf
+            del current_node
+
 
     def preprocessing_for_icfof(self, ntss_tmp, bool_print: bool = False, count_num_node: bool = False):
         """
@@ -325,7 +368,7 @@ class TreeISAX:
 
         bkpt_ndarray = np_ndarray(shape=(2, len(self.node_list), self.size_word), dtype=float)
         for num_n, node in enumerate(self.node_list):
-            bkpt_ndarray[0][num_n], bkpt_ndarray[1][num_n] = node._do_bkpt()
+            bkpt_ndarray[0][num_n], bkpt_ndarray[1][num_n], _ = node._do_bkpt()
         return bkpt_ndarray
 
     def _minmax_obj_vs_node(self, ntss_tmp, bool_print: bool = False):
@@ -519,6 +562,24 @@ class TreeISAX:
             if node.level == level:
                 node_list.append(node)
         return node_list
+
+    def get_nodes_of_level_or_terminal(self, level: int):
+        """
+        Function to return the nodes of a level knowing root level 0 or terminal nodes above that level
+
+        :param int level: The level of the tree to evaluate
+
+        :returns: The nodes of the level-ie level of the tree
+        :rtype: list
+        """
+        
+        node_list = []
+        for _, _, node in RenderTree(self.root):
+            if node.level == level:
+                node_list.append(node)
+            elif node.level < level and node.terminal:
+                node_list.append(node)
+        return node_list        
 
     def get_number_internal_and_terminal(self):
         """
